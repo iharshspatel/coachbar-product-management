@@ -1,62 +1,45 @@
-import { useState, useEffect } from 'react';
-import { Form, Button, Row, Col } from 'react-bootstrap';
-import FormContainer from '../components/FormContainer';
-import Loader from '../components/Loader';
-// import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { useGetAllUserMutation, useRegisterMutation } from '../slices/usersApiSlice';
-import { setCredentials } from '../slices/authSlice';
+import { Form, Button } from 'react-bootstrap';
+import { useParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import { defaultProduct } from '../constants/product';
-import { useGetProductMutation, useUpdateProductMutation } from '../slices/productApiSlice';
+import { useUpdateProductMutation } from '../slices/productApiSlice';
+import FormContainer from '../components/FormContainer';
+import { useGetAllUsers } from '../hooks/useGetAllUsers';
+import { useProductData } from '../hooks/useProductData';
 
 const ProductUpdateScreen = () => {
-    const {id} = useParams()
 
-  const [product, setProduct] = useState(defaultProduct);
-  const [alluser, setAllUsers] = useState([]);
-  const [getProduct] = useGetProductMutation();
+  const { id } = useParams()
+
+  const [product, setProduct] = useProductData(id);
+  const [alluser, setAllUsers] = useGetAllUsers([]);
+
+
   const [updateProduct] = useUpdateProductMutation()
-  const [getAllUser] = useGetAllUserMutation();
 
   const { userInfo } = useSelector((state) => state.auth);
-  function formHandler(type,value){
-    let newProduct = {...product};
+
+  function formHandler(type, value) {
+    let newProduct = { ...product };
     newProduct[type] = value;
     setProduct(newProduct);
   }
 
-  async function getProductData(){
-    const {product} = await getProduct(id).unwrap();
-    setProduct(product);
 
-  }
-
-  async function getAllUsers(){
-    let {data} = await getAllUser();
-    setAllUsers(data.users)
-  }
-
-
-  useEffect(()=>{
-    getProductData(id);
-    getAllUsers()
-  },[])
 
   const submitHandler = async (e) => {
     e.preventDefault();
 
-      try {
-          product.id = id
-        const res = await updateProduct(product).unwrap();
-        toast.success(`Product is Updated.`);
-        navigate('/');
-      } catch (err) {
-        toast.error(err?.data?.message || err.error);
-      }
+    try {
+      product.id = id
+      const res = await updateProduct(product).unwrap();
+      toast.success(`Product is Updated.`);
+      navigate('/');
+    } catch (err) {
+      toast.error(err?.data?.message || err.error);
+    }
   };
-    
+
   return (
     <FormContainer>
       <h1>Update Product</h1>
@@ -113,14 +96,14 @@ const ProductUpdateScreen = () => {
         </Form.Group>
 
         {userInfo.isAdmin && <Form.Group className='my-2' controlId='userId'>
-        <Form.Label>Select User</Form.Label>
-        <Form.Select onChange={(e)=>formHandler("userId",e.target.value)} aria-label="Default select example">
+          <Form.Label>Select User</Form.Label>
+          <Form.Select onChange={(e) => formHandler("userId", e.target.value)} aria-label="Default select example">
             <option>Select User</option>
             {
-              alluser.map((i)=><option value={i.id}>{i.name}</option>)
+              alluser.map((i) => <option value={i.id}>{i.name}</option>)
             }
-          
-        </Form.Select>
+
+          </Form.Select>
         </Form.Group>}
 
         <Button type='submit' variant='primary' className='mt-3'>

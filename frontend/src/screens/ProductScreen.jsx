@@ -1,55 +1,44 @@
-import { useState, useEffect } from 'react';
-import { Form, Button, Row, Col } from 'react-bootstrap';
-import FormContainer from '../components/FormContainer';
-import Loader from '../components/Loader';
-// import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { useGetAllUserMutation, useRegisterMutation } from '../slices/usersApiSlice';
-import { setCredentials } from '../slices/authSlice';
+import { useState } from 'react';
+import { Form, Button } from 'react-bootstrap';
+import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { defaultProduct } from '../constants/product';
 import { useCreateProductMutation } from '../slices/productApiSlice';
+import FormContainer from '../components/FormContainer';
+import Loader from '../components/Loader';
+import { useGetAllUsers } from '../hooks/useGetAllUsers';
 
 const ProductScreen = () => {
-  
-  const [product, setProduct] = useState(defaultProduct);
-  const [alluser, setAllUsers] = useState([]);
-  const { userInfo } = useSelector((state) => state.auth);
-  const [createProduct, { isLoading }] = useCreateProductMutation();
-  const [getAllUser] = useGetAllUserMutation();
 
-  function formHandler(type,value){
-    let newProduct = {...product};
+  const [product, setProduct] = useState(defaultProduct);
+  const [alluser, setAllUsers] = useGetAllUsers([]);
+
+  const { userInfo } = useSelector((state) => state.auth);
+
+  const [createProduct, { isLoading }] = useCreateProductMutation();
+
+
+  function formHandler(type, value) {
+    let newProduct = { ...product };
     newProduct[type] = value;
     setProduct(newProduct);
   }
 
-  async function getAllUsers(){
-    let {data} = await getAllUser();
-    setAllUsers(data.users)
-  }
-
-  useEffect(()=>{
-    getAllUsers();
-  },[])
-
   const submitHandler = async (e) => {
     e.preventDefault();
 
-      try {
-          ("Product", product);
-        if(!product.userId){
-          product.userId = userInfo._id
-        }
-        const res = await createProduct(product).unwrap();
-        toast.success(`${res.name} is Created.`);
-        navigate('/');
-      } catch (err) {
-        toast.error(err?.data?.message || err.error);
+    try {
+      if (!product.userId) {
+        product.userId = userInfo._id
       }
+      const res = await createProduct(product).unwrap();
+      toast.success(`${res.name} is Created.`);
+      navigate('/');
+    } catch (err) {
+      toast.error(err?.data?.message || err.error);
+    }
   };
-    
+
   return (
     <FormContainer>
       <h1>Create Product</h1>
@@ -106,14 +95,14 @@ const ProductScreen = () => {
         </Form.Group>
 
         {userInfo.isAdmin && <Form.Group className='my-2' controlId='userId'>
-        <Form.Label>Select User</Form.Label>
-        <Form.Select onChange={(e)=>formHandler("userId",e.target.value)} aria-label="Default select example">
+          <Form.Label>Select User</Form.Label>
+          <Form.Select onChange={(e) => formHandler("userId", e.target.value)} aria-label="Default select example">
             <option>Select User</option>
             {
-              alluser.map((i)=><option value={i.id}>{i.name}</option>)
+              alluser.map((i) => <option value={i.id}>{i.name}</option>)
             }
-          
-        </Form.Select>
+
+          </Form.Select>
         </Form.Group>}
 
         <Button type='submit' variant='primary' className='mt-3'>

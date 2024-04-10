@@ -1,17 +1,18 @@
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import ProductGrid from '../components/ProductGrid';
 import { useDeleteProductMutation, useGetAllProductsMutation } from '../slices/productApiSlice';
+import { InputGroup, Form, Row, Col } from 'react-bootstrap';
 import Hero from '../components/Hero.jsx';
-import { InputGroup, Form, Button, Row, Col } from 'react-bootstrap';
+import ProductGrid from '../components/ProductGrid';
 
 const HomeScreen = () => {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
-  const [searchText , setSearchText ] = useState('');
+
+  const [searchText, setSearchText] = useState('');
   const [categories, setCategories] = useState([]);
-  const [selectedCategories , setSelectedCategories] = useState([]);
-  const [selectedSource , setSelectedSource] = useState([])
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [selectedSource, setSelectedSource] = useState([])
 
   const [getAllProduct] = useGetAllProductsMutation();
   const [deleteProduct] = useDeleteProductMutation();
@@ -21,17 +22,17 @@ const HomeScreen = () => {
   async function getAllProducts() {
     let { data } = await getAllProduct();
     setProducts(data.products);
-    setFilteredProducts(data.products); 
+    setFilteredProducts(data.products);
     const uniqueCategories = [...new Set(data.products.map((product) => product.category))];
     setCategories(uniqueCategories);
   }
 
   async function deleteHandler(id) {
     await deleteProduct(id);
-    getAllProducts();
+    await getAllProducts();
   }
 
-  function filterProducts(){
+  function filterProducts() {
 
     const searchTerm = searchText.toLowerCase();
     let filtered = products.filter(
@@ -40,14 +41,15 @@ const HomeScreen = () => {
         product.category.toLowerCase().includes(searchTerm)
     );
 
-    if(searchTerm === 0){
+    if (searchTerm === 0) {
       filters = products;
     }
 
     if (selectedCategories.length === 0) {
       setFilteredProducts(filtered);
-    } else {
-       filtered = filtered.filter((product) =>
+    } 
+    else {
+      filtered = filtered.filter((product) =>
         selectedCategories.includes(product.category)
       );
       setFilteredProducts(filtered);
@@ -55,8 +57,9 @@ const HomeScreen = () => {
 
     if (selectedSource.length === 0) {
       setFilteredProducts(filtered);
-    } else {
-       filtered = filtered.filter((product) =>
+    } 
+    else {
+      filtered = filtered.filter((product) =>
         selectedSource.includes(product.source)
       );
       setFilteredProducts(filtered);
@@ -64,36 +67,36 @@ const HomeScreen = () => {
   }
 
 
-    function toggleCategory(category) {
-      const newSelectedCategories = [...selectedCategories];
-      const index = newSelectedCategories.indexOf(category);
-      if (index > -1) {
-        newSelectedCategories.splice(index, 1);
-      } else {
-        newSelectedCategories.push(category);
-      }
-      setSelectedCategories(newSelectedCategories);
+  function toggleCategory(category) {
+    const newSelectedCategories = [...selectedCategories];
+    const index = newSelectedCategories.indexOf(category);
+    if (index > -1) {
+      newSelectedCategories.splice(index, 1);
+    } else {
+      newSelectedCategories.push(category);
     }
+    setSelectedCategories(newSelectedCategories);
+  }
 
-    function toggleSource(source){
-      const newSelectedSource = [...selectedSource];
-      const index = newSelectedSource.indexOf(source);
-      if (index > -1) {
-        newSelectedSource.splice(index, 1);
-      } else {
-        newSelectedSource.push(source);
-      }
-      setSelectedSource(newSelectedSource);
+  function toggleSource(source) {
+    const newSelectedSource = [...selectedSource];
+    const index = newSelectedSource.indexOf(source);
+    if (index > -1) {
+      newSelectedSource.splice(index, 1);
+    } else {
+      newSelectedSource.push(source);
     }
-  
+    setSelectedSource(newSelectedSource);
+  }
+
 
   useEffect(() => {
     getAllProducts();
   }, []);
 
-  useEffect(()=>{
+  useEffect(() => {
     filterProducts()
-  },[selectedCategories,selectedSource,searchText])
+  }, [selectedCategories, selectedSource, searchText])
 
   if (!userInfo) {
     return <Hero />;
@@ -105,42 +108,42 @@ const HomeScreen = () => {
 
   return (
     <>
-      
-          <InputGroup className="mb-3">
-            <Form.Control
-              placeholder="Search by Name or SKU"
-              aria-label="Search"
-              aria-describedby="basic-addon1"
-              onChange={(e)=>setSearchText(e.target.value)}
-            />
-          </InputGroup>
-        <Row className="">
-        <Col md={2}>
-        <Form>
-              {categories.map((category, index) => (
-                <Form.Check
-                  key={index}
-                  type="checkbox"
-                  label={category}
-                  checked={selectedCategories.includes(category)}
-                  onChange={() => toggleCategory(category)}
-                />
-              ))}
 
-            {["ADMIN" , "USER"].map((source, index) => (
-                <Form.Check
-                  key={index}
-                  type="checkbox"
-                  label={source}
-                  checked={selectedSource.includes(source)}
-                  onChange={() => toggleSource(source)}
-                />
-              ))}
-            </Form>
+      <InputGroup className="mb-3">
+        <Form.Control
+          placeholder="Search by Name or SKU"
+          aria-label="Search"
+          aria-describedby="basic-addon1"
+          onChange={(e) => setSearchText(e.target.value)}
+        />
+      </InputGroup>
+      <Row className="">
+        <Col md={2}>
+          <Form>
+            {categories.map((category, index) => (
+              <Form.Check
+                key={index}
+                type="checkbox"
+                label={category}
+                checked={selectedCategories.includes(category)}
+                onChange={() => toggleCategory(category)}
+              />
+            ))}
+
+            {["ADMIN", "USER"].map((source, index) => (
+              <Form.Check
+                key={index}
+                type="checkbox"
+                label={source}
+                checked={selectedSource.includes(source)}
+                onChange={() => toggleSource(source)}
+              />
+            ))}
+          </Form>
         </Col>
-      <Col md={10}>
-      <ProductGrid products={filteredProducts} deleteHandler={deleteHandler} />
-      </Col>
+        <Col md={10}>
+          <ProductGrid products={filteredProducts} deleteHandler={deleteHandler} />
+        </Col>
       </Row>
     </>
   );
