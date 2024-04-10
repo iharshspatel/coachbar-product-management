@@ -12,7 +12,7 @@ import { isAdmin } from '../middleware/authorizeMiddleware.js';
 
 const router = express.Router();
 
-router.post('/', registerUser);
+router.post('/',protect, isAdmin, registerUser);
 router.post('/auth', authUser);
 router.post('/logout', logoutUser);
 router.get('/all', protect, isAdmin, getAllUsers)
