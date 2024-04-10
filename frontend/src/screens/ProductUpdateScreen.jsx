@@ -6,6 +6,7 @@ import { useUpdateProductMutation } from '../slices/productApiSlice';
 import FormContainer from '../components/FormContainer';
 import { useGetAllUsers } from '../hooks/useGetAllUsers';
 import { useProductData } from '../hooks/useProductData';
+import Loader from '../components/Loader';
 
 const ProductUpdateScreen = () => {
 
@@ -39,6 +40,14 @@ const ProductUpdateScreen = () => {
       toast.error(err?.data?.message || err.error);
     }
   };
+
+  if(!product.userId && alluser.length === 0){
+    return <Loader/>
+  }
+  else{
+    console.log(product)
+  }
+
 
   return (
     <FormContainer>
@@ -95,12 +104,12 @@ const ProductUpdateScreen = () => {
           ></Form.Control>
         </Form.Group>
 
-        {userInfo.isAdmin && <Form.Group className='my-2' controlId='userId'>
+        {(userInfo.isAdmin && product.userId && alluser.length > 0) && <Form.Group className='my-2' controlId='userId'>
           <Form.Label>Select User</Form.Label>
-          <Form.Select onChange={(e) => formHandler("userId", e.target.value)} aria-label="Default select example">
-            <option>Select User</option>
+          <Form.Select defaultValue={`${product.userId}`} onChange={(e) => formHandler("userId", e.target.value)} aria-label="Default select example">
+            {/* <option>User Option</option> */}
             {
-              alluser.map((i) => <option value={i.id}>{i.name}</option>)
+              alluser.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)
             }
 
           </Form.Select>

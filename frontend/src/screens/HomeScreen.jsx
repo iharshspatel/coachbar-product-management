@@ -4,6 +4,7 @@ import { useDeleteProductMutation, useGetAllProductsMutation } from '../slices/p
 import { InputGroup, Form, Row, Col } from 'react-bootstrap';
 import Hero from '../components/Hero.jsx';
 import ProductGrid from '../components/ProductGrid';
+import NoProducts from '../components/NoProducts.jsx';
 
 const HomeScreen = () => {
   const [products, setProducts] = useState([]);
@@ -38,7 +39,8 @@ const HomeScreen = () => {
     let filtered = products.filter(
       (product) =>
         product.name.toLowerCase().includes(searchTerm) ||
-        product.category.toLowerCase().includes(searchTerm)
+        product.category.toLowerCase().includes(searchTerm) ||
+        product.sku.toLowerCase().includes(searchTerm)
     );
 
     if (searchTerm === 0) {
@@ -103,7 +105,7 @@ const HomeScreen = () => {
   }
 
   if (products.length === 0) {
-    return <p>No Products!</p>;
+    return <NoProducts/>
   }
 
   return (
@@ -118,8 +120,10 @@ const HomeScreen = () => {
         />
       </InputGroup>
       <Row className="">
-        <Col md={2}>
+        <Col md={2} className='border border-1 rounded h-100 pb-4'>
+          <h3 className='my-3'>Filters</h3>
           <Form>
+            <h6 className='my-2'>Categories</h6>
             {categories.map((category, index) => (
               <Form.Check
                 key={index}
@@ -129,7 +133,7 @@ const HomeScreen = () => {
                 onChange={() => toggleCategory(category)}
               />
             ))}
-
+            <h6 className='my-2'>Sources</h6>
             {["ADMIN", "USER"].map((source, index) => (
               <Form.Check
                 key={index}
