@@ -101,6 +101,11 @@ const updateProduct = expressAsyncHandler(async (req, res) => {
 
   const product = await Product.findById(req.params.id);
 
+  if(req.user._id !== product.userId){
+    res.status(401);
+    throw new Error(' Not Autorized To Access This Product');
+  }
+
   if (product) {
     product.name = req.body.name || product.name;
     product.sku = req.body.sku || product.sku;
