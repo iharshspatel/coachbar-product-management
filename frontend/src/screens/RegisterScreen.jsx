@@ -33,6 +33,7 @@ const RegisterScreen = () => {
     } else {
       try {
         await register({ name, email, password }).unwrap();
+        toast.success("User Registered Successfully.");
         navigate('/');
       } catch (err) {
         toast.error(err?.data?.message || err.error);
